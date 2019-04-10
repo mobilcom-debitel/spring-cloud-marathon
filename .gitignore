@@ -90,3 +90,5 @@ derbyDB
 derby.log
 /jbehave
 */out/*
+
+lombok.config
