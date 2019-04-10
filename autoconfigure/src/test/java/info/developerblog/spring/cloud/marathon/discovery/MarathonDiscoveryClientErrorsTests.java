@@ -1,12 +1,13 @@
 package info.developerblog.spring.cloud.marathon.discovery;
 
+import info.developerblog.spring.cloud.marathon.MarathonProperties;
 import mesosphere.marathon.client.Marathon;
 import mesosphere.marathon.client.MarathonException;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -19,7 +20,7 @@ public class MarathonDiscoveryClientErrorsTests {
 
     @BeforeClass
     public static void setup() throws MarathonException {
-        discoveryClient = new MarathonDiscoveryClient(marathonClient);
+        discoveryClient = new MarathonDiscoveryClient(marathonClient, new MarathonProperties(), null);
 
         when(marathonClient.getApps()).thenThrow(new MarathonException(404, "Not Found"));
         when(marathonClient.getApp(anyString())).thenThrow(new MarathonException(404, "Not Found"));

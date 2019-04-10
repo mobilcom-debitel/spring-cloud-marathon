@@ -8,6 +8,7 @@ apply plugin: 'com.jfrog.bintray'
 
 dependencies {
     compileOnly "org.springframework.boot:spring-boot-starter-web"
+    compileOnly "org.springframework.boot:spring-boot-starter-webflux"
     compileOnly "org.springframework.boot:spring-boot-starter-actuator"
     compileOnly "org.springframework.boot:spring-boot-configuration-processor"
     compileOnly "org.springframework.cloud:spring-cloud-commons"
@@ -20,6 +21,7 @@ dependencies {
 
     //FIXME: sourceSets fails on NoClassDef exception
     integTestCompile "org.springframework.boot:spring-boot-starter-web"
+    integTestCompile "org.springframework.boot:spring-boot-starter-webflux"
     integTestCompile "org.springframework.boot:spring-boot-starter-actuator"
     integTestCompile "org.springframework.boot:spring-boot-configuration-processor"
     integTestCompile "org.springframework.cloud:spring-cloud-commons"
@@ -32,7 +34,7 @@ dependencies {
 }
 
 jacoco {
-    toolVersion = "0.7.6.201602180812"
+    toolVersion = "0.8.3"
 }
 
 jacocoTestReport {

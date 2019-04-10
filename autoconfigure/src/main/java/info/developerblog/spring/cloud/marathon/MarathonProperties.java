@@ -32,6 +32,8 @@ public class MarathonProperties {
 
     private boolean enabled = true;
 
+    private String group = null;
+
     public String getEndpoint() {
         if (null != endpoint) {
             return endpoint;

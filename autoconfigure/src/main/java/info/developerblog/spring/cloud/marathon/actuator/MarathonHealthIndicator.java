@@ -1,30 +1,29 @@
 package info.developerblog.spring.cloud.marathon.actuator;
 
 import mesosphere.marathon.client.Marathon;
-import mesosphere.marathon.client.model.v2.App;
 import mesosphere.marathon.client.model.v2.GetServerInfoResponse;
-import mesosphere.marathon.client.model.v2.VersionedApp;
-
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Created by aleksandr on 01.08.16.
  */
 public class MarathonHealthIndicator extends AbstractHealthIndicator {
-    Marathon client;
+    private Marathon client;
+    private String group;
 
-    public MarathonHealthIndicator(Marathon client) {
+    public MarathonHealthIndicator(Marathon client, String group) {
         this.client = client;
+        this.group = group;
     }
 
     @Override
-    protected void doHealthCheck(Health.Builder builder) throws Exception {
+    protected void doHealthCheck(Health.Builder builder) {
         try {
             GetServerInfoResponse serverInfo = client.getServerInfo();
-            List<VersionedApp> apps = client.getApps().getApps();
+            Collection<?> apps = (group == null) ? client.getApps().getApps() : client.getGroup(group).getApps();
             builder.up()
                     .withDetail("services", apps)
                     .withDetail("name", serverInfo.getName())

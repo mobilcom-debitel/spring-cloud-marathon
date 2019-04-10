@@ -9,11 +9,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -56,10 +59,13 @@ public class MarathonHealthConfigTests {
     @EnableDiscoveryClient
     @EnableAutoConfiguration
     @Import({ MarathonAutoConfiguration.class, MarathonDiscoveryClientAutoConfiguration.class })
+    @EnableConfigurationProperties(value = MarathonProperties.class)
     public static class TestConfig {
+
         @Bean
-        public Marathon marathonClient(MarathonProperties properties) {
-            return mock(Marathon.class, withSettings().defaultAnswer(Answers.RETURNS_MOCKS.get()));
+        @Primary
+        public Marathon marathonTestClient(MarathonProperties properties) {
+            return mock(Marathon.class, withSettings().defaultAnswer(Answers.RETURNS_MOCKS));
         }
     }
 }

@@ -6,17 +6,18 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
-        classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.0.1.RELEASE'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0'
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.1.4.RELEASE'
         classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:3.2.0'
-        classpath 'com.netflix.nebula:nebula-publishing-plugin:5.1.0'
-        classpath 'com.netflix.nebula:nebula-project-plugin:3.2.1'
+        classpath 'com.netflix.nebula:nebula-publishing-plugin:10.0.0'
+        classpath 'com.netflix.nebula:nebula-project-plugin:6.0.2'
         classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.6.3'
     }
 }
 
 plugins {
-    id 'nebula.release' version '6.3.5'
+    id 'nebula.release' version '10.0.0'
+    id "io.freefair.lombok" version "3.2.0"
 }
 
 allprojects {
@@ -33,15 +34,16 @@ allprojects {
 
     dependencyManagement {
         imports {
-            mavenBom "org.springframework.cloud:spring-cloud-starter-parent:Finchley.SR1"
+            mavenBom "org.springframework.cloud:spring-cloud-starter-parent:Greenwich.SR1"
         }
 
         dependencies {
-            dependency 'org.projectlombok:lombok:1.16.8'
-            dependency 'com.mesosphere:marathon-client:0.6.0'
-            dependency 'com.netflix.feign:feign-ribbon:8.14.1'
-            dependency 'org.unitils:unitils-core:3.4.2'
-            dependency 'com.jayway.jsonpath:json-path:2.2.0'
+            dependency 'org.projectlombok:lombok:1.18.6'
+            dependency 'com.mesosphere:marathon-client:0.6.2'
+            dependency 'com.netflix.feign:feign-ribbon:8.18.0'
+            dependency 'org.unitils:unitils-core:3.4.6'
+            dependency 'com.jayway.jsonpath:json-path:2.4.0'
+            dependency 'com.sun.xml.ws:jaxws-ri:2.3.2'
         }
     }
 
@@ -54,6 +56,7 @@ allprojects {
 
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'io.freefair.lombok'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
@@ -67,6 +70,7 @@ subprojects {
 
     dependencies {
         compileOnly 'org.projectlombok:lombok'
+        compileOnly 'com.sun.xml.ws:jaxws-ri:2.3.2'
 
         testCompile 'org.springframework.boot:spring-boot-starter-test'
         testCompile ('org.unitils:unitils-core') {

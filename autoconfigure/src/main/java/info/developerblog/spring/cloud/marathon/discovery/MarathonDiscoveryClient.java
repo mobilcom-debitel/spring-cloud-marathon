@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import info.developerblog.spring.cloud.marathon.MarathonProperties;
 import mesosphere.marathon.client.MarathonException;
 import mesosphere.marathon.client.model.v2.HealthCheckResults;
 import org.springframework.cloud.client.DefaultServiceInstance;
@@ -20,26 +21,42 @@ import mesosphere.marathon.client.model.v2.App;
 import mesosphere.marathon.client.model.v2.GetAppResponse;
 import mesosphere.marathon.client.model.v2.GetAppsResponse;
 import mesosphere.marathon.client.model.v2.VersionedApp;
+import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 
 /**
  * Created by aleksandr on 07.07.16.
  */
 @Slf4j
-public class MarathonDiscoveryClient implements DiscoveryClient {
+public class MarathonDiscoveryClient implements DiscoveryClient, ApplicationListener<ContextRefreshedEvent> {
 
     private static final String SPRING_CLOUD_MARATHON_DISCOVERY_CLIENT_DESCRIPTION = "Spring Cloud Marathon Discovery Client";
 
     private static final String ALL_SERVICES = "*";
 
     private final Marathon client;
+    private final String group;
+    private final MarathonProperties properties;
+    private final ApplicationContext context;
 
-    public MarathonDiscoveryClient(Marathon client) {
+    public MarathonDiscoveryClient(Marathon client, MarathonProperties properties, ApplicationContext context) {
         this.client = client;
+        this.group = properties.getGroup();
+        this.properties = properties;
+        this.context = context;
     }
 
     @Override
     public String description() {
         return SPRING_CLOUD_MARATHON_DISCOVERY_CLIENT_DESCRIPTION;
+    }
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        // Trigger Spring Discovery Client
+        this.context.publishEvent(new InstanceRegisteredEvent<>(this, this.properties));
     }
 
     @Override
@@ -138,6 +155,7 @@ public class MarathonDiscoveryClient implements DiscoveryClient {
                                 .allMatch(HealthCheckResults::getAlive)
                 )
                 .map(task -> new DefaultServiceInstance(
+                        task.getId(),
                         ServiceIdConverter.convertToServiceId(task.getAppId()),
                         task.getHost(),
                         task.getPorts().stream().findFirst().orElse(0),
@@ -152,6 +170,14 @@ public class MarathonDiscoveryClient implements DiscoveryClient {
 
     @Override
     public List<String> getServices() {
+        if (group == null) {
+            return getAllApps();
+        } else {
+            return getGroupApps();
+        }
+    }
+
+    private List<String> getAllApps() {
         try {
             return client.getApps()
                     .getApps()
@@ -164,4 +190,19 @@ public class MarathonDiscoveryClient implements DiscoveryClient {
             return Collections.emptyList();
         }
     }
+
+    private List<String> getGroupApps() {
+        try {
+            return client.getGroup(group)
+                    .getApps()
+                    .parallelStream()
+                    .map(App::getId)
+                    .map(ServiceIdConverter::convertToServiceId)
+                    .collect(Collectors.toList());
+        } catch (MarathonException e) {
+            log.error(e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
+
 }

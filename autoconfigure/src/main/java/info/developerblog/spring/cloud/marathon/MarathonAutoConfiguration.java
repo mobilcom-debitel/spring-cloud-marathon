@@ -1,3 +1,8 @@
+//#***************************************************************************
+//# mobilcom IT Entwicklung Source File: MarathonAutoConfiguration.java
+//# Copyright (c) 1996-2019 by mobilcom-debitel GmbH
+//# All rights reserved.
+//#***************************************************************************
 package info.developerblog.spring.cloud.marathon;
 
 import javax.xml.ws.Endpoint;
@@ -12,55 +17,61 @@ import org.springframework.context.annotation.Configuration;
 
 import info.developerblog.spring.cloud.marathon.actuator.MarathonEndpoint;
 import info.developerblog.spring.cloud.marathon.actuator.MarathonHealthIndicator;
+
 import mesosphere.marathon.client.Marathon;
 import mesosphere.marathon.client.RibbonMarathonClient;
 
-/**
+
+/********************************************************************
  * Created by aleksandr on 07.07.16.
  */
-@Configuration
-@EnableConfigurationProperties
 @ConditionalOnMarathonEnabled
-public class MarathonAutoConfiguration {
-    @Bean
-    @ConditionalOnMissingBean
-    public MarathonProperties marathonProperties() {
-        return new MarathonProperties();
-    }
+@Configuration
+@EnableConfigurationProperties(MarathonProperties.class)
+public class MarathonAutoConfiguration
+{
+	//~ Methods ----------------------------------------------------------------------------------------------------------------
 
-    @Bean
-    @ConditionalOnMissingBean
-    public Marathon marathonClient(MarathonProperties properties) {
-        return new RibbonMarathonClient.Builder(properties.getEndpoint())
-                .withListOfServers(properties.getListOfServers())
-                .withToken(properties.getToken())
-                .withUsername(properties.getUsername())
-                .withPassword(properties.getPassword())
-                .build();
-    }
 
-    @Configuration
-    @ConditionalOnClass(HealthIndicator.class)
-    protected static class MarathonHealthConfig {
+	@Bean
+	@ConditionalOnMissingBean
+	public Marathon marathonClient(MarathonProperties properties)
+	{
+		return new RibbonMarathonClient.Builder(properties.getEndpoint()).withListOfServers(properties.getListOfServers())
+			.withToken(properties.getToken())
+			.withUsername(properties.getUsername())
+			.withPassword(properties.getPassword())
+			.build();
+	}
 
-        @Bean
-        @ConditionalOnMissingBean
-        @ConditionalOnProperty(value = "spring.cloud.discovery.client.marathon.health-indicator.enabled", matchIfMissing = true )
-        public MarathonHealthIndicator healthIndicator(Marathon client) {
-            return new MarathonHealthIndicator(client);
-        }
+	//~ Inner Classes ----------------------------------------------------------------------------------------------------------
 
-    }
+	@ConditionalOnClass(HealthIndicator.class)
+	@Configuration
+	protected static class MarathonHealthConfig
+	{
+		//~ Methods ------------------------------------------------------------------------------------------------------------
 
-    @Configuration
-    @ConditionalOnClass(Endpoint.class)
-    protected static class MarathonEndpointConfig {
+		@Bean
+		@ConditionalOnMissingBean
+		@ConditionalOnProperty(value = "spring.cloud.discovery.client.marathon.health-indicator.enabled", matchIfMissing = true)
+		public MarathonHealthIndicator marathonHealthIndicator(Marathon client, MarathonProperties properties)
+		{
+			return new MarathonHealthIndicator(client, properties.getGroup());
+		}
+	}
 
-        @Bean
-        @ConditionalOnMissingBean
-        public MarathonEndpoint marathonEndpoint(Marathon client) {
-            return new MarathonEndpoint(client);
-        }
+	@ConditionalOnClass(Endpoint.class)
+	@Configuration
+	protected static class MarathonEndpointConfig
+	{
+		//~ Methods ------------------------------------------------------------------------------------------------------------
 
-    }
+		@Bean
+		@ConditionalOnMissingBean
+		public MarathonEndpoint marathonEndpoint(Marathon client)
+		{
+			return new MarathonEndpoint(client);
+		}
+	}
 }

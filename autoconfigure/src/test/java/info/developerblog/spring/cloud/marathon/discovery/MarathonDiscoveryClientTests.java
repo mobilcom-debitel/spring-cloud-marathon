@@ -1,14 +1,14 @@
 package info.developerblog.spring.cloud.marathon.discovery;
 
+import info.developerblog.spring.cloud.marathon.MarathonProperties;
+import info.developerblog.spring.cloud.marathon.discovery.sse.MarathonEventStreamDispatcher;
 import mesosphere.marathon.client.Marathon;
 import mesosphere.marathon.client.MarathonException;
-import mesosphere.marathon.client.model.v2.App;
 import mesosphere.marathon.client.model.v2.GetAppResponse;
 import mesosphere.marathon.client.model.v2.GetAppsResponse;
 import mesosphere.marathon.client.model.v2.HealthCheckResults;
 import mesosphere.marathon.client.model.v2.Task;
 import mesosphere.marathon.client.model.v2.VersionedApp;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.cloud.client.DefaultServiceInstance;
@@ -37,7 +37,7 @@ public class MarathonDiscoveryClientTests {
 
     @BeforeClass
     public static void setup() {
-        discoveryClient = new MarathonDiscoveryClient(marathonClient);
+        discoveryClient = new MarathonDiscoveryClient(marathonClient, new MarathonProperties(), null);
     }
 
     @Test
